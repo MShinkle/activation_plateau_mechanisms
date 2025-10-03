@@ -1,0 +1,7 @@
+# Configuration for paper_analyses_v2 project
+model_name: "gpt2-large"
+shared_context: "The house was"
+token_pairs:
+  - ["big", "in"]
+  - ["big", "large"]
+n_steps: 50

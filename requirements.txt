@@ -1,0 +1,10 @@
+matplotlib==3.10.6
+matplotlib-inline==0.1.7
+numpy==1.26.4
+torch==2.8.0+cu128
+torchaudio==2.8.0+cu128
+torchvision==0.23.0+cu128
+tqdm==4.67.1
+transformer-lens==2.16.1
+transformers==4.56.2
+transformers-stream-generator==0.0.5
