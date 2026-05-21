@@ -8,7 +8,7 @@ import os
 from tqdm import tqdm
 import sys
 sys.path.append('./scripts')
-from utils import load_model, load_config, load_activations, generate_interpolation_results_plot
+from utils import load_model, load_config, load_activations, generate_interpolation_results_plot, get_device
 
 config = load_config()
 MODEL_NAME = config['model_name']
@@ -60,10 +60,11 @@ def compute_jacobian_mlp(model, resid_mid_interpolated: torch.Tensor, layer_idx:
 
 
 def main():
+    device = get_device()
+
     print(f"Model: {MODEL_NAME} | Context: '{SHARED_CONTEXT}' | Steps: {N_STEPS}")
 
-    model = load_model(MODEL_NAME)
-    device = 'cuda' if torch.cuda.is_available() else 'cpu'
+    model = load_model(MODEL_NAME, device)
     n_layers = model.cfg.n_layers
     print(f"Loaded {n_layers}-layer model on {device}")
 

@@ -12,6 +12,8 @@ Designed to be fairly dependency-light. You can install dependencies from `requi
 pip install -r requirements.txt
 ```
 
+**macOS (MPS) users:** Remove the `+cu128` suffixes from the PyTorch packages in `requirements.txt` before installing, then set `device: "mps"` (or `"auto"`) in `config.yaml` to use Apple Silicon GPU acceleration.
+
 Might not work with transformerlens 3.x.
 
 ## Usage
