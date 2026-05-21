@@ -19,13 +19,14 @@ from tqdm import tqdm
 from transformer_lens import HookedTransformer
 import sys
 sys.path.append('./scripts')
-from utils import load_model, load_config, slerp_rescale, construct_filepath
+from utils import load_model, load_config, slerp_rescale, construct_filepath, get_device
 
 config = load_config()
 MODEL_NAME = config['model_name']
 SHARED_CONTEXT = config['shared_context']
 TOKEN_PAIRS = config['token_pairs']
 N_STEPS = config['n_steps']
+DEVICE = get_device()
 
 # Hook types to record at each layer
 ACTIVATION_HOOKS = [
@@ -154,10 +155,9 @@ def main():
     print(f"Model: {MODEL_NAME} | Context: '{SHARED_CONTEXT}' | Steps: {N_STEPS}")
     print(f"Freeze attention: {args.freeze_attention} | Freeze MLP: {args.freeze_mlp}")
 
-    model = load_model(MODEL_NAME)
-    device = 'cuda' if torch.cuda.is_available() else 'cpu'
+    model = load_model(MODEL_NAME, DEVICE)
     n_layers = model.cfg.n_layers
-    print(f"Loaded {n_layers}-layer model on {device}")
+    print(f"Loaded {n_layers}-layer model on {DEVICE}")
 
     output_dir = f"./activations/{MODEL_NAME}"
     os.makedirs(output_dir, exist_ok=True)
@@ -169,7 +169,7 @@ def main():
         reference_activations = {}
         for idx, token in enumerate(token_pair):
             reference_activations[f'token_{idx}'] = collect_original_activations(
-                model, SHARED_CONTEXT, token, device
+                model, SHARED_CONTEXT, token, DEVICE
             )
 
         # Interpolate at each layer
@@ -188,7 +188,7 @@ def main():
                 resid_post_b=reference_activations['token_1'],
                 interpolation_layer=interpolation_layer,
                 n_steps=N_STEPS,
-                device=device,
+                device=DEVICE,
                 freeze_attention=args.freeze_attention,
                 freeze_mlp=args.freeze_mlp
             )

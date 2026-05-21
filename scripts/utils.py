@@ -12,6 +12,19 @@ from transformer_lens import HookedTransformer
 from transformers import GPT2LMHeadModel, GPT2Tokenizer
 from typing import List, Dict, Union
 
+def get_device() -> str:
+    """Resolve device from config.yaml, with auto-detection supporting cuda, mps, and cpu."""
+    config = load_config()
+    requested = config.get('device', 'auto')
+    if requested == "auto":
+        if torch.cuda.is_available():
+            return "cuda"
+        elif torch.backends.mps.is_available():
+            return "mps"
+        return "cpu"
+    return requested
+
+
 # Dictionary of no-LayerNorm models with standardized names
 NO_LAYERNORM_MODELS = {
     "gpt2-small_LNFree": "schaeff/gpt2-small_LNFree300",
@@ -20,9 +33,10 @@ NO_LAYERNORM_MODELS = {
     "gpt2-xl_LNFree": "schaeff/gpt2-xl_LNFree800"
 }
 
-def load_gpt2_regular(model_name):
+def load_gpt2_regular(model_name, device=None):
     """Load regular GPT-2 with LayerNorm."""
-    device = 'cuda' if torch.cuda.is_available() else 'cpu'
+    if device is None:
+        device = get_device()
     
     # Map model names to actual model names
     model_mapping = {
@@ -43,9 +57,10 @@ def load_gpt2_regular(model_name):
     
     return model, tokenizer, device, model_name
 
-def load_gpt2_no_ln(model_name):
+def load_gpt2_no_ln(model_name, device=None):
     """Load GPT-2 without LayerNorm from the specified model."""
-    device = 'cuda' if torch.cuda.is_available() else 'cpu'
+    if device is None:
+        device = get_device()
     
     if model_name not in NO_LAYERNORM_MODELS:
         raise ValueError(f"Unknown no-LayerNorm model: {model_name}. Available: {list(NO_LAYERNORM_MODELS.keys())}")
@@ -91,12 +106,12 @@ def load_gpt2_no_ln(model_name):
     
     return model, tokenizer, device, model_name
 
-def load_model(model_name):
+def load_model(model_name, device=None):
     """Load either regular, no-LayerNorm GPT-2, or OPT model."""
     if 'LNFree' in model_name:
-        model, tokenizer, device, actual_name = load_gpt2_no_ln(model_name)
+        model, tokenizer, device, actual_name = load_gpt2_no_ln(model_name, device)
     else:
-        model, tokenizer, device, actual_name = load_gpt2_regular(model_name)
+        model, tokenizer, device, actual_name = load_gpt2_regular(model_name, device)
     # Store the original model name for saving
     model.original_model_name = model_name
     return model

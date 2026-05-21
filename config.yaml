@@ -5,3 +5,4 @@ token_pairs:
   - ["big", "in"]
   - ["big", "large"]
 n_steps: 50
+device: "auto"  # auto (cuda > mps > cpu), cuda, mps, or cpu
